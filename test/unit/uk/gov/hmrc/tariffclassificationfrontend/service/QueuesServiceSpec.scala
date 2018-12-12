@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.tariffclassificationfrontend.service
 
+import org.mockito.BDDMockito.given
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.tariffclassificationfrontend.models.Queue
+import uk.gov.hmrc.tariffclassificationfrontend.models.{Case, Queue, Queues}
 
-class QueuesServiceSpec extends UnitSpec {
+class QueuesServiceSpec extends UnitSpec with MockitoSugar {
 
   private val service = new QueuesService()
 
@@ -56,6 +58,27 @@ class QueuesServiceSpec extends UnitSpec {
 
     "not find unknown queue" in {
       service.getOneById("0") shouldBe None
+    }
+  }
+
+  "Find Queue Of" should {
+
+    "find no queue for case without queue_id" in {
+      val c = mock[Case]
+      given(c.queueId).willReturn(None)
+      service.findQueueOf(c) shouldBe None
+    }
+
+    "find no queue queue for case with unknown queue_id" in {
+      val c = mock[Case]
+      given(c.queueId).willReturn(Some("-1"))
+      service.findQueueOf(c) shouldBe None
+    }
+
+    "find relevant queue for case" in {
+      val c = mock[Case]
+      given(c.queueId).willReturn(Some(Queues.gateway.id))
+      service.findQueueOf(c) shouldBe Some(Queues.gateway)
     }
   }
 

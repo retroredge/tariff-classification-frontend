@@ -17,8 +17,8 @@
 package uk.gov.hmrc.tariffclassificationfrontend.service
 
 import javax.inject.Singleton
-import uk.gov.hmrc.tariffclassificationfrontend.models.Queue
 import uk.gov.hmrc.tariffclassificationfrontend.models.Queues._
+import uk.gov.hmrc.tariffclassificationfrontend.models.{Case, Queue}
 
 @Singleton
 class QueuesService {
@@ -33,6 +33,10 @@ class QueuesService {
 
   def getOneById(id: String): Option[Queue] = {
     getAll.find(_.id == id)
+  }
+
+  def findQueueOf(c: Case): Option[Queue] = {
+    c.queueId.flatMap(id => getAll.find(_.id == id))
   }
 
 }
