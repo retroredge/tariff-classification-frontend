@@ -9,7 +9,7 @@ GET         /queues                               controllers.Default.redirect(t
 GET         /queues/my-cases                     @uk.gov.hmrc.tariffclassificationfrontend.controllers.MyCasesController.myCases()
 GET         /queues/reports                      @uk.gov.hmrc.tariffclassificationfrontend.controllers.ReportsController.reports()
 GET         /queues/reports/:reportId            @uk.gov.hmrc.tariffclassificationfrontend.controllers.ReportsController.report(reportId: String)
-POST        /queues/reports/:reportId            @uk.gov.hmrc.tariffclassificationfrontend.controllers.ReportsController.generateReport(reportId: String)
+
 GET         /queues/assigned                     @uk.gov.hmrc.tariffclassificationfrontend.controllers.AssignedCasesController.assignedCases()
 GET         /queues/assigned/:assigneeId         @uk.gov.hmrc.tariffclassificationfrontend.controllers.AssignedCasesController.assignedCasesFor(assigneeId: String)
 GET         /queues/:slug                        @uk.gov.hmrc.tariffclassificationfrontend.controllers.QueuesController.queue(slug: String)
