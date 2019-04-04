@@ -29,6 +29,7 @@ import uk.gov.hmrc.tariffclassificationfrontend.views
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.Future.successful
 
 @Singleton
 class ReportsController @Inject()(authenticated: AuthenticatedAction,
@@ -47,7 +48,7 @@ class ReportsController @Inject()(authenticated: AuthenticatedAction,
   }
 
   def generateReport(reportId: String): Action[AnyContent] = (authenticated andThen verifiedManager).async { implicit request =>
-    showReportParams()
+    successful(Ok(views.html.partials.sla_report_results()))
   }
 
   private def showReportParams(reportId: Option[String] = None)

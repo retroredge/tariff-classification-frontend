@@ -23,10 +23,10 @@
 @import uk.gov.hmrc.tariffclassificationfrontend.controllers.routes.ReportsController
 @()(implicit request: AuthenticatedRequest[_], appConfig: AppConfig, messages: Messages)
 
-<h2 class="heading-small">SLA Report</h2>
+<h2 class="heading-small">SLA report criteria</h2>
 
 
-<div class="form-group">
+<div class="form-group mt-30">
     <fieldset>
         <legend>
             <span class="form-label-bold">
@@ -74,7 +74,7 @@
     </fieldset>
 </div>
 
-<a id="generate-report-button" class="button" role="button" target="_blank" href="#">Generate Report</a>
+<a id="generate-report-button" class="button" role="button" target="_blank" href="@ReportsController.generateReport("sla-report")">Generate report</a>
 
 
 
