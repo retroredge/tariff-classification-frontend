@@ -26,11 +26,11 @@ class AuthenticatedRequest[A](_operator: Operator, _request: Request[A], _access
   val operator : Operator = _operator
   val request  : Request[A] = _request
 
-  val hasWritePermission: Boolean = _accessType == AccessType.READ_WRITE
+  val hasWritePermission: Boolean = _accessType == AccessType.READ_WRITE || operator.manager
   val hasReadOnlyPermission: Boolean = _accessType == AccessType.READ_ONLY
 }
 
-class AuthenticatedCaseRequest[A](operator: Operator, request: Request[A], accessType: AccessType, _c: Option[Case])
+class AuthenticatedCaseRequest[A](operator: Operator, request: Request[A], accessType: AccessType = READ_WRITE, _c: Option[Case])
                   extends AuthenticatedRequest[A] (operator , request, accessType){
 
   val c : Option[Case] = _c

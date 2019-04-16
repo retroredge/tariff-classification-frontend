@@ -50,11 +50,11 @@ class CompleteCaseController @Inject()(actions: RequestActions,
     decisionForm.bindFrom(c.decision).map(_.errors).exists(_.isEmpty)
   }
 
-  def completeCase(reference: String): Action[AnyContent] = actions.authorised.async { implicit request =>
+  def completeCase(reference: String): Action[AnyContent] = actions.authorisedWithWriteAccess.async { implicit request =>
     getCaseAndRenderView(reference, c => successful(views.html.complete_case(c)))
   }
 
-  def confirmCompleteCase(reference: String): Action[AnyContent] = actions.authorised.async { implicit request =>
+  def confirmCompleteCase(reference: String): Action[AnyContent] = actions.authorisedWithWriteAccess.async { implicit request =>
     getCaseAndRenderView(reference, casesService.completeCase(_, request.operator).map(views.html.confirm_complete_case(_)))
   }
 

@@ -21,10 +21,14 @@ import play.api.mvc.ActionBuilder
 import uk.gov.hmrc.tariffclassificationfrontend.models.request.AuthenticatedCaseRequest
 
 @Singleton
-case class RequestActions @Inject()(authoriseCase: AuthoriseCaseAction,
-                                    readOnlyCase: ReadOnlyCaseAction,
-                                    authenticated: AuthenticatedAction){
+class RequestActions @Inject()(authoriseCase: AuthoriseCaseAction,
+                               readOnlyCase: ReadOnlyCaseAction,
+                               caseExistAction: CaseExistAction,
+                               _authenticated: AuthenticatedAction){
 
-  def authorised: ActionBuilder[AuthenticatedCaseRequest] = authenticated andThen authoriseCase
-  def authReadOnly: ActionBuilder[AuthenticatedCaseRequest] = authenticated andThen readOnlyCase
+  def authorisedWithWriteAccess: ActionBuilder[AuthenticatedCaseRequest] = _authenticated andThen authoriseCase
+  def authorised: ActionBuilder[AuthenticatedCaseRequest] = _authenticated andThen readOnlyCase
+  def caseExists(reference: String): CaseExistAction = caseExistAction(reference)
+  def authenticated(reference: String): CaseExistAction = caseExistAction(reference)
+  _authenticated
 }

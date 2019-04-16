@@ -18,9 +18,10 @@ package uk.gov.hmrc.tariffclassificationfrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.Results._
-import play.api.mvc.{ActionRefiner, Request, Result}
+import play.api.mvc.{ActionRefiner, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.tariffclassificationfrontend.controllers.UriUtils.extractCaseReference
 import uk.gov.hmrc.tariffclassificationfrontend.models.request.AccessType.AccessType
 import uk.gov.hmrc.tariffclassificationfrontend.models.request.{AccessType, AuthenticatedCaseRequest, AuthenticatedRequest}
 import uk.gov.hmrc.tariffclassificationfrontend.models.{Case, Operator}
@@ -51,6 +52,32 @@ class AuthoriseCaseAction @Inject()(override val casesService: CasesService)
   }
 }
 
+@Singleton
+class CaseExistAction @Inject()(reference : String)(implicit casesService: CasesService)
+  extends ActionRefiner[AuthenticatedRequest, AuthenticatedCaseRequest] {
+
+  override protected def refine[A](request: AuthenticatedRequest[A]):
+  Future[Either[Result, AuthenticatedCaseRequest[A]]] = {
+
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(
+      request.headers,
+      Some(request.session)
+    )
+
+    casesService.getOne(reference).flatMap {
+      case Some(c: Case) => successful(Right(authCaseRequest(request, c)))
+      case _ => successful(Left(Redirect(routes.CaseController.caseNotFound(reference))))
+    }
+
+    def authCaseRequest[A](request: AuthenticatedRequest[A], c: Case): AuthenticatedCaseRequest[A] = {
+      new AuthenticatedCaseRequest(
+        operator = request.operator,
+        request = request,
+        _c = Some(c))
+    }
+  }
+}
+
 trait CommonCaseAction {
 
   implicit val casesService : CasesService
@@ -62,17 +89,13 @@ trait CommonCaseAction {
       Some(request.session)
     )
 
-    val reference = extractCaseReference(request.request)
+    val reference = extractCaseReference(request.request.uri).get
 
     casesService.getOne(reference).flatMap {
-      case Some(c: Case) if hasWritePermissions(c, request.operator) => successful(Right(authCaseRequest(request, c, AccessType.READ_WRITE)))
+      case Some(c: Case) if c.isAssignedTo(request.operator) => successful(Right(authCaseRequest(request, c, AccessType.READ_WRITE)))
       case Some(c: Case) => successful(onDeniedPermission(c))
       case _ => successful(Left(Redirect(routes.CaseController.caseNotFound(reference))))
     }
-  }
-
-  private def extractCaseReference[A]: Request[_] => String = { r =>
-    r.uri.split("/").filter(_.length > 2)(2)
   }
 
   def authCaseRequest[A](request: AuthenticatedRequest[A], c: Case, accessType: AccessType): AuthenticatedCaseRequest[A] = {
@@ -82,10 +105,14 @@ trait CommonCaseAction {
       accessType = accessType,
       _c = Some(c))
   }
+}
 
-  private def hasWritePermissions[A] : (Case,  Operator) => Boolean = { (c, operator) =>
-    operator.manager ||  c.assignee.exists(_.id == operator.id)
-
+object UriUtils {
+  //TODO
+  def extractCaseReference(uri : String): Option[String] = {
+    uri.split("/").lift(3)
   }
 
 }
+
+
